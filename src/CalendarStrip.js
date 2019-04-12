@@ -7,12 +7,16 @@ import PropTypes from "prop-types";
 import {polyfill} from 'react-lifecycles-compat';
 import { View, Animated, Easing } from "react-native";
 
-import moment from "moment";
+import 'moment';
+import 'moment/locale/pt-br';
+import moment from 'moment-timezone';
 
 import CalendarHeader from "./CalendarHeader";
 import CalendarDay from "./CalendarDay";
 import WeekSelector from "./WeekSelector";
 import styles from "./Calendar.style.js";
+
+moment().locale('pt-br');
 
 /*
  * Class CalendarStrip that is representing the whole calendar strip and contains CalendarDay elements
@@ -42,7 +46,6 @@ class CalendarStrip extends Component {
     showDayNumber: PropTypes.bool,
     showDate: PropTypes.bool,
 
-    dayComponent: PropTypes.any,
     leftSelector: PropTypes.any,
     rightSelector: PropTypes.any,
     iconLeft: PropTypes.any,
@@ -56,10 +59,8 @@ class CalendarStrip extends Component {
     minDayComponentSize: PropTypes.number,
     responsiveSizingOffset: PropTypes.number,
 
-    calendarHeaderContainerStyle: PropTypes.any,
     calendarHeaderStyle: PropTypes.any,
     calendarHeaderFormat: PropTypes.string,
-    calendarHeaderPosition: PropTypes.oneOf(['above', 'below']),
 
     calendarAnimation: PropTypes.object,
     daySelectionAnimation: PropTypes.object,
@@ -74,7 +75,6 @@ class CalendarStrip extends Component {
     highlightDateNumberStyle: PropTypes.any,
     disabledDateNameStyle: PropTypes.any,
     disabledDateNumberStyle: PropTypes.any,
-    markedDatesStyle: PropTypes.object,
     disabledDateOpacity: PropTypes.number,
     styleWeekend: PropTypes.bool,
 
@@ -90,7 +90,6 @@ class CalendarStrip extends Component {
     iconLeft: require("./img/left-arrow-black.png"),
     iconRight: require("./img/right-arrow-black.png"),
     calendarHeaderFormat: "MMMM YYYY",
-    calendarHeaderPosition: 'above',
     datesWhitelist: undefined,
     datesBlacklist: undefined,
     disabledDateOpacity: 0.3,
@@ -541,11 +540,10 @@ class CalendarStrip extends Component {
   render() {
     let datesForWeek = this.state.datesForWeek;
     let datesRender = [];
-    let _CalendarDay = this.props.dayComponent ? this.props.dayComponent : CalendarDay;
     for (let i = 0; i < datesForWeek.length; i++) {
       let enabled = this.state.datesAllowedForWeek[i];
       let calendarDay = (
-        <_CalendarDay
+        <CalendarDay
           date={datesForWeek[i]}
           marking={this.getDateMarking(datesForWeek[i])}
           selected={this.state.datesSelectedForWeek[i]}
@@ -562,7 +560,6 @@ class CalendarStrip extends Component {
           highlightDateNumberStyle={this.props.highlightDateNumberStyle}
           disabledDateNameStyle={this.props.disabledDateNameStyle}
           disabledDateNumberStyle={this.props.disabledDateNumberStyle}
-          markedDatesStyle={this.props.markedDatesStyle}
           disabledDateOpacity={this.props.disabledDateOpacity}
           styleWeekend={this.props.styleWeekend}
           daySelectionAnimation={this.props.daySelectionAnimation}
@@ -591,7 +588,6 @@ class CalendarStrip extends Component {
     let calendarHeader = this.props.showMonth && (
       <CalendarHeader
         calendarHeaderFormat={this.props.calendarHeaderFormat}
-        calendarHeaderContainerStyle={this.props.calendarHeaderContainerStyle}
         calendarHeaderStyle={this.props.calendarHeaderStyle}
         datesForWeek={this.state.datesForWeek}
         fontSize={this.state.monthFontSize}
@@ -599,7 +595,7 @@ class CalendarStrip extends Component {
       />
     );
 
-    // calendarHeader renders above or below of the dates & left/right selectors if dates are shown.
+    // calendarHeader renders above the dates & left/right selectors if dates are shown.
     // However if dates are hidden, the header shows between the left/right selectors.
     return (
       <View
@@ -613,8 +609,7 @@ class CalendarStrip extends Component {
           style={[this.props.innerStyle, { height: this.state.height }]}
           onLayout={this.onLayout.bind(this)}
         >
-          {this.props.showDate && this.props.calendarHeaderPosition === 'above' && calendarHeader}
-
+          {this.props.showDate && calendarHeader}
           <View style={styles.datesStrip}>
             <WeekSelector
               controlDate={this.props.minDate}
@@ -652,8 +647,6 @@ class CalendarStrip extends Component {
               size={this.state.selectorSize}
             />
           </View>
-
-          {this.props.showDate && this.props.calendarHeaderPosition === 'below' && calendarHeader}
         </View>
       </View>
     );
